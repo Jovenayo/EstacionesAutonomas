@@ -1,0 +1,38 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial BtSerial(10, 11); // RX -> 11 / TX -> 10
+
+int IdEstacion;
+
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  BtSerial.begin(9600);
+  pinMode(5, INPUT);
+  IdEstacion = 1;
+
+
+}
+
+void loop() {
+  //HumedadSuelo ------------------------------------
+  int humedadSuelo = analogRead(A0);
+  //-------------------------------------------------
+  //Lluvia ------------------------------------------
+  int lluvia = digitalRead(5);
+  //-------------------------------------------------
+  //TemperaturaHumedad-------------------------------ERROR SENSOR ROTO (NaN)
+  
+  //-------------------------------------------------
+  //---------BLUETOOTH-------------------------------
+  
+  BtSerial.print("#Est.:");
+  BtSerial.print(String(IdEstacion));
+  BtSerial.print("#HumedadSuel:");
+  BtSerial.print(String(humedadSuelo));
+  BtSerial.print("#Lluvia:");
+  BtSerial.println(String(lluvia));
+  delay(1000);
+
+}
