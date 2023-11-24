@@ -182,6 +182,3 @@ void Estacion(int clienteEstacion_socket){ //Zona de riesgo para escribir el fic
         }
     close(clienteEstacion_socket);
 }
-
-
-
