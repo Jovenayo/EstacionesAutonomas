@@ -45,7 +45,7 @@ void GestorClientes(){
 	serverClientes_address.sin_addr.s_addr = INADDR_ANY;
 	
 	//Enlazar soket a la direcicon y puerto.
-	if(bind(serverCliente_socket, (struct soketaddr*)&serverEstaciones_address, sizeof(serverEstaciones_address)) < 0){
+	if(bind(serverCliente_socket, (struct soketaddr*)&serverClientes_address, sizeof(serverClientes_address)) < 0){
 	    perror("Error en el enlace");
 	    exit(EXIT_FAILURE);
 	}
