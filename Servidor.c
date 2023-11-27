@@ -99,7 +99,7 @@ void Cliente(int clienteCliente_socket){
 				break;
 			case 2://: Obtener datos de una estacion
 				//Obtenemos Id Estacion del soket
-				getDatos(clienteCliente_socket, clie);
+				getDatos(clienteCliente_socket);
 				break;
 			case 3:
 			
@@ -221,7 +221,7 @@ void getDato(int clienteCliente_soket){
 		fgets(linea, sizeof(linea), f);
 	
 		// Obtenemos el primer campo de la línea
-		char *campo_1 = strtok(linea, ":");
+		char *campo_1 = strtok(linea, "#");
 	
 		// Si el primer campo es igual al número, enviamos la línea
 		if (atoi(campo_1) == atoi(idEstacion)) {
