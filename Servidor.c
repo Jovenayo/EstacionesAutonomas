@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <pthread.h>
 
+#define DIRECCION
 #define PORT 8080
 #define MAX_BUFFER_SIZE 1024;
 const char *ficehroGuardado = "fichero.txt"; //Dieccion del fichero de guardado.
