@@ -43,6 +43,7 @@ void GestorClientes(){
 	serverClientes_address.sin_family = AF_INET;
 	serverClientes_address.sin_port = htons(PORT);
 	serverClientes_address.sin_addr.s_addr = INADDR_ANY;//Direccion del server (INADDR-ANY: Conexiones a cualquier interfaz del sistea.)
+	memset(serverClientes_address.sin_zero, '\0', sizeof serverClientes_address.sin_zero);
 	
 	//Enlazar soket a la direcicon y puerto.
 	if(bind(serverCliente_socket, (struct soketaddr*)&serverClientes_address, sizeof(serverClientes_address)) < 0){
@@ -132,6 +133,7 @@ void GestorEstaciones(){
 	serverEstaciones_address.sin_family = AF_INET;
 	serverEstaciones_address.sin_port = htons(PORT);
 	serverEstaciones_address.sin_addr.s_addr = INADDR_ANY;//Direccion del server (INADDR-ANY: Conexiones a cualquier interfaz del sistea.)
+	memset(serverEstaciones_address.sin_zero, '\0', sizeof serverEstaciones_address.sin_zero);
 	
 	//Enlazar soket a la direcicon y puerto.
 	if(bind(serverEstacion_socket, (struct soketaddr*)&serverEstaciones_address, sizeof(serverEstaciones_address)) < 0){
