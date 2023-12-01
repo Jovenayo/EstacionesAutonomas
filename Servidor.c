@@ -5,9 +5,9 @@
 #include <sys/wait.h>
 #include <pthread.h>
 
-#define PORT 8080;
-#define MAX_BUFFER_SIZE 1024;
-#define FICEHRO_GUARDADO "fichero.txt"; //Dieccion del fichero de guardado.
+#define PORT 8080
+#define MAX_BUFFER_SIZE 1024
+#define FICEHRO_GUARDADO "fichero.txt" //Dieccion del fichero de guardado.
 int fd; //Descriptor del fichero.
 struct sockaddr_in serverEstaciones_address, clienteEstacion_address, serverClientes_address, clienteCliente_address; //Estructuras para almacenar las direcciones de conexion.
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -41,7 +41,7 @@ void GestorClientes(){
 	
 	//Configurar direccion del servidor
 	serverClientes_address.sin_family = AF_INET;
-	serverClientes_address.sin_port = htons(PORT);
+	serverClientes_address.sin_port = htons((int)PORT);
 	serverClientes_address.sin_addr.s_addr = INADDR_ANY;//Direccion del server (INADDR-ANY: Conexiones a cualquier interfaz del sistea.)
 	memset(serverClientes_address.sin_zero, '\0', sizeof serverClientes_address.sin_zero);
 	
@@ -88,9 +88,8 @@ void Cliente(int clienteCliente_socket){
 	char opc[1024];
 	//Recivir la opcion a realizar
 	size_t bytes_recividos = recv(clienteCliente_socket, buffer, sizeof(buffer), 0);
-	recv(clienteCliente_socket, opc, sizeof(opt), 0)
-	int opcion = atoi(opc)
-
+	recv(clienteCliente_socket, opc, sizeof(opc), 0);
+	int opcion = atoi(opc);
 
 	if(bytes_recividos > 0){
 		//Crear el case, con las respectivas funciones
@@ -131,7 +130,7 @@ void GestorEstaciones(){
 	
 	//Configurar direccion del servidor
 	serverEstaciones_address.sin_family = AF_INET;
-	serverEstaciones_address.sin_port = htons(PORT);
+	serverEstaciones_address.sin_port = htons((int)PORT);
 	serverEstaciones_address.sin_addr.s_addr = INADDR_ANY;//Direccion del server (INADDR-ANY: Conexiones a cualquier interfaz del sistea.)
 	memset(serverEstaciones_address.sin_zero, '\0', sizeof serverEstaciones_address.sin_zero);
 	
@@ -183,7 +182,7 @@ void Estacion(int clienteEstacion_socket){ //Zona de riesgo para escribir el fic
 	if(bytes_recividos > 0){
 	
 		//Abrir el archivo en modo escritura
-		FILE *file = fopen(ficehroGuardado, "a");
+		FILE *file = fopen(FICEHRO_GUARDADO, "a");
 		if(file == NULL){
 			perror("Error al abrir el archivo");
 			exit(EXIT_FAILURE);
@@ -203,12 +202,12 @@ void Estacion(int clienteEstacion_socket){ //Zona de riesgo para escribir el fic
 
 
 //Funciones de gestion del fichero
-void getDato(int clienteCliente_soket){
+void getDato(int clienteCliente_socket){
 	// Abrimos el archivo en modo lectura
-	FILE *f = fopen(FICEHRO_GUARDADO, "r");
+	FILE *f = fopen(string(FICEHRO_GUARDADO), "r");
 	char idEstacion[1024];
 	
-	recv(clienteCliente_socket, idEstacion, sizeof(idEstacion), 0)
+	recv(clienteCliente_socket, idEstacion, sizeof(idEstacion), 0);
 	
 	// Si el archivo no existe, imprimimos un mensaje de error
 	if (f == NULL) {
@@ -230,10 +229,10 @@ void getDato(int clienteCliente_soket){
 			send(clienteCliente_socket, linea, sizeof(linea), 0);
 		}
 	}
-	close(clienteCliente_socket)
+	close(clienteCliente_socket);
 	// Cerramos el archivo
 	fclose(f);
 	
 	return 0;
-	}
 }
+
