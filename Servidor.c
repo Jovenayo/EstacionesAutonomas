@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <pthread.h>
+#include <string.h>
 
 #define PORT 8080
 #define MAX_BUFFER_SIZE 1024
@@ -70,7 +71,7 @@ void GestorClientes(){
 			exit(EXIT_FAILURE);
 		}
 		
-		if(forck() == 0){
+		if(fork() == 0){
 			//Proceso hijo Estacion para mantener la conexion-------------------------------------------------
 			close(serverCliente_socket);
 			Cliente(clienteCliente_socket);//Proceso hijo Cliente
@@ -160,7 +161,7 @@ void GestorEstaciones(){
 			exit(EXIT_FAILURE);
 		}
 		
-		if(forck() == 0){
+		if(fork() == 0){
 			//Proceso hijo Estacion para mantener la conexion-------------------------------------------------
 			close(serverEstacion_socket);
 			Estacion(clienteEstacion_socket);//Proceso hijo Estacion
