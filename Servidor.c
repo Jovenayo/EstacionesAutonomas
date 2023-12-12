@@ -10,6 +10,7 @@
 #define MAX_BUFFER_SIZE 1024
 #define FICEHRO_GUARDADO "fichero.txt" //Dieccion del fichero de guardado.
 int fd; //Descriptor del fichero.
+
 struct sockaddr_in serverEstaciones_address, clienteEstacion_address, serverClientes_address, clienteCliente_address; //Estructuras para almacenar las direcciones de conexion.
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 socklen_t addr_size;
@@ -166,7 +167,7 @@ void Estacion(int clienteEstacion_socket){ //Zona de riesgo para escribir el fic
 
 void GestorEstaciones(){
 	
-	//Crear Soket
+	//Crear Soket 
 	int serverEstacion_socket, clienteEstacion_socket;
 	serverEstacion_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if(serverEstacion_socket == -1){
@@ -182,7 +183,7 @@ void GestorEstaciones(){
 	
 	//Enlazar soket a la direcicon y puerto.
 	if(bind(serverEstacion_socket, (struct sockaddr*)&serverEstaciones_address, sizeof(serverEstaciones_address)) < 0){
-		perror("Error en el enlace");
+		perror("Error en el enlace:");
 		exit(EXIT_FAILURE);
 	}
 	
