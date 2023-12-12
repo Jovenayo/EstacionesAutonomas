@@ -6,7 +6,8 @@
 #include <pthread.h>
 #include <string.h>
 
-#define PORT 8080
+#define PORTE 8080
+#define PORTC 8081
 #define MAX_BUFFER_SIZE 1024
 #define FICEHRO_GUARDADO "fichero.txt" //Dieccion del fichero de guardado.
 int fd; //Descriptor del fichero.
@@ -95,13 +96,13 @@ void GestorClientes(){
 	
 	//Configurar direccion del servidor
 	serverClientes_address.sin_family = AF_INET;
-	serverClientes_address.sin_port = htons((int)PORT);
+	serverClientes_address.sin_port = htons((int)PORTC);
 	serverClientes_address.sin_addr.s_addr = INADDR_ANY;//Direccion del server (INADDR-ANY: Conexiones a cualquier interfaz del sistea.)
 	memset(serverClientes_address.sin_zero, '\0', sizeof serverClientes_address.sin_zero);
 	
 	//Enlazar soket a la direcicon y puerto.
 	if(bind(serverCliente_socket, (struct sockaddr*)&serverClientes_address, sizeof(serverClientes_address)) < 0){
-	    perror("Error en el enlace");
+	    perror("Error en el enlace Cliente");
 	    exit(EXIT_FAILURE);
 	}
 	
@@ -177,13 +178,13 @@ void GestorEstaciones(){
 	
 	//Configurar direccion del servidor
 	serverEstaciones_address.sin_family = AF_INET;
-	serverEstaciones_address.sin_port = htons((int)PORT);
+	serverEstaciones_address.sin_port = htons((int)PORTE);
 	serverEstaciones_address.sin_addr.s_addr = INADDR_ANY;//Direccion del server (INADDR-ANY: Conexiones a cualquier interfaz del sistea.)
 	memset(serverEstaciones_address.sin_zero, '\0', sizeof serverEstaciones_address.sin_zero);
 	
 	//Enlazar soket a la direcicon y puerto.
 	if(bind(serverEstacion_socket, (struct sockaddr*)&serverEstaciones_address, sizeof(serverEstaciones_address)) < 0){
-		perror("Error en el enlace:");
+		perror("Error en el enlace Estacion:");
 		exit(EXIT_FAILURE);
 	}
 	
