@@ -56,7 +56,6 @@ void Cliente(int clienteCliente_socket){
 	size_t bytes_recividos = recv(clienteCliente_socket, buffer, sizeof(buffer), 0);
 	recv(clienteCliente_socket, opc, sizeof(opc), 0);
 	int opcion = atoi(opc);
-
 	if(bytes_recividos > 0){
 		//Crear el case, con las respectivas funciones
 		switch (opcion) {
@@ -71,12 +70,12 @@ void Cliente(int clienteCliente_socket){
 			
 				break;
 			default:
-			printf("Opción no valida.\n");
+			printf("Opción no valida: %i\n",opcion);
   		}
 			
 		
     	} else { 
-        printf("Error al recibir datos del socket");
+        printf("Error al recibir datos del socket: %s\n",opc);
         }
 	//Enviar resultado de la peticion
 	
@@ -140,6 +139,7 @@ void GestorClientes(){
 
 
 void Estacion(int clienteEstacion_socket){ //Zona de riesgo para escribir el fichero
+	while(1){
 	char buffer[1024];
 
 	//Recibir datos de la estacion
@@ -160,9 +160,10 @@ void Estacion(int clienteEstacion_socket){ //Zona de riesgo para escribir el fic
         	//cerrar el ficehro
         	fclose(file);
        		printf("Línea escrita en el archivo: %d\n", (int)bytes_recividos);
-    	} else { 
-        printf("Error al recibir datos del socket");
+    	} else {
+       		 printf("Error al recibir datos del socket: %s\n",buffer );
         }
+}
     close(clienteEstacion_socket);
 }
 
@@ -209,6 +210,7 @@ void GestorEstaciones(){
 		}
 		
 		if(fork() == 0){
+			printf("ScK Entra\n");
 			//Proceso hijo Estacion para mantener la conexion-------------------------------------------------
 			close(serverEstacion_socket);
 			Estacion(clienteEstacion_socket);//Proceso hijo Estacion
@@ -216,6 +218,7 @@ void GestorEstaciones(){
 		} else {
 			//Cerrar soket y termianr hijos
 			close (clienteEstacion_socket);
+			printf("ScK Sale\n");
 			waitpid(-1, NULL, WNOHANG);
 		}
 	}
