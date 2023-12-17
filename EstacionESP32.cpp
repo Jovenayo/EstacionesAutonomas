@@ -1,22 +1,25 @@
+// Importa las bibliotecas necesarias
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include <DHTesp.h>
 
 const char* ssid = "JVA";
-const char* password = "********";
+const char* password = "11111111";
 
-const char* host = "192.168.121.130";
+const char* host = "192.168.59.130";
 const int port = 8080;
+
+float humedad;
+float temperatura;
+
+DHTesp dht;
 WiFiClient cliente;
+char mensaje[50];
+
 
 void setup() {
   Serial.begin(115200);
- 
-}
-
-void loop() {
-
-  delay(1000);
   cliente = WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -31,7 +34,18 @@ void loop() {
     return;
   }
   Serial.println("Conectado al host");
-  char mensaje[] = "mensaje de ejemplo";
+  pinMode(32, INPUT);
+  dht.setup(32, DHTesp::DHT11);
+}
+void loop() {
+  delay(1000);
+  humedad = dht.getHumidity();
+  Serial.print("humedad");
+  temperatura = dht.getTemperature();
+  Serial.print("temperatura");
+  sprintf(mensaje, "T#%d#H#%d#\n", temperatura, humedad);
+  Serial.printf("mensaje0:");
+  delay(100);
   cliente.write(mensaje, sizeof(mensaje));
-  WiFi.disconnect();
+  Serial.printf(mensaje);
  }
