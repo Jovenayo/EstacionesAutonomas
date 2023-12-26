@@ -87,8 +87,7 @@ void Cliente(int clienteCliente_socket){
 	char buffer[1024];
 	char opc[1024];
 	//Recivir la opcion a realizar
-	size_t bytes_recividos = recv(clienteCliente_socket, buffer, sizeof(buffer), 0);
-	recv(clienteCliente_socket, opc, sizeof(opc), 0);
+	size_t bytes_recividos = recv(clienteCliente_socket, opc, sizeof(opc), 0);
 	int opcion = atoi(opc);
 	printf("%d\n", opcion);
 	if(bytes_recividos > 0){
@@ -157,6 +156,7 @@ if(serverCliente_socket == -1){
 
 		if(fork() == 0){ //Proceso hijo Estacion para mantener la conexion----------------------------[HIJO]----------------
 			close(serverCliente_socket);
+            printf("Cliente conectado \n");
 			Cliente(clienteCliente_socket);//Proceso hijo Cliente
 			exit(EXIT_SUCCESS);
 		} else {
