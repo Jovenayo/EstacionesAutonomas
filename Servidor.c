@@ -8,6 +8,7 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <stdbool.h>
 
 #define PORTE 8080
 #define PORTC 8081
@@ -30,86 +31,103 @@ void  interrupcion(int signo){
 
 void sendDatosEstacion(int clienteCliente_socket){
 	// Abrimos el archivo en modo lectura
-	FILE *f = fopen(FICHERO_GUARDADO, "r");
 	char idEstacion[1024];
+    int salir = 1;
 
-	recv(clienteCliente_socket, idEstacion, sizeof(idEstacion), 0);
-    printf("idEstacion: %s \n", idEstacion);
+    while(salir){
+        // Obtenemos la ID de la estacion que deseamos ver, si este es 0 significa que se ha seleccionado volver al menu anterior
+	    recv(clienteCliente_socket, idEstacion, sizeof(idEstacion), 0);
+        if(atoi(idEstacion) == 0){
+            printf("Menu Opciones\n");
+            salir = 0;
 
-
-	// Si el archivo no existe, imprimimos un mensaje de error
-	if (f == NULL) {
-		printf("El archivo no existe.\n");
-        return;
-	}
-
-    char *ultimaLinea = NULL;
-    char copiaLinea[100] = "";
-
-	// Leemos cada línea del archivo
-	while (fgets(copiaLinea, sizeof(copiaLinea), f) != NULL) {
-		// Obtenemos la línea del archivo
-        copiaLinea[strcspn(copiaLinea, "\n")] = '\0';
-        char *copiaAntesStrtok = (char *)malloc(strlen(copiaLinea) + 1);
-		strcpy(copiaAntesStrtok, copiaLinea);
-
-
-		// Obtenemos el primer campo de la línea
-		char *campo_1 = strtok(copiaLinea, "#");
-
-		// Si el primer campo es igual al número, enviamos la línea
-		if (atoi(campo_1) == atoi(idEstacion)) {
-            ultimaLinea = copiaAntesStrtok;
-		}
-	}
-
-    printf("Ultimalinea: %s \n", ultimaLinea);
-    if(ultimaLinea != NULL){
-        ssize_t bytes_sent = send(clienteCliente_socket, ultimaLinea, strlen(ultimaLinea), 0);
-        if (bytes_sent == -1) {
-            // Error en el envío
-            perror("Error al enviar datos");
         } else {
-            // Éxito en el envío
-            printf("Se han enviado %zd bytes\n", bytes_sent);
+            printf("idEstacion: %s \n", idEstacion);
+
+
+	        // Si el archivo de datos no existe, imprimimos un mensaje de error
+            FILE *f = fopen(FICHERO_GUARDADO, "r");
+	        if (f == NULL) {
+		        printf("El archivo de datos no existe.\n");
+                return;
+	        }
+
+            char *ultimaLinea = NULL;
+            char copiaLinea[100] = "";
+
+	        // Leemos cada línea del archivo
+	        while (fgets(copiaLinea, sizeof(copiaLinea), f) != NULL) {
+		        // Obtenemos la línea del archivo
+                copiaLinea[strcspn(copiaLinea, "\n")] = '\0';
+                char *copiaAntesStrtok = (char *)malloc(strlen(copiaLinea) + 1);
+		        strcpy(copiaAntesStrtok, copiaLinea);
+
+
+		        // Obtenemos el primer campo de la línea
+		        char *campo_1 = strtok(copiaLinea, "#");
+
+		        // Si el primer campo es igual al número, enviamos la línea
+		        if (atoi(campo_1) == atoi(idEstacion)) {
+                    ultimaLinea = copiaAntesStrtok;
+		        }
+	        }
+
+            printf("Ultimalinea: %s \n", ultimaLinea);
+            if(ultimaLinea != NULL){
+                ssize_t bytes_sent = send(clienteCliente_socket, ultimaLinea, strlen(ultimaLinea), 0);
+                if (bytes_sent == -1) {
+                    // Error en el envío
+                    perror("Error al enviar datos");
+                } else {
+                    // Éxito en el envío
+                    printf("Se han enviado %zd caracteres\n", bytes_sent-1);
+                }
+                //send(clienteCliente_socket, "\n", 1, 0);
+                free(ultimaLinea);
+            }
+            fclose(f);
         }
-        //send(clienteCliente_socket, "\n", 1, 0);
-        free(ultimaLinea);
     }
 
-	close(clienteCliente_socket);
 	// Cerramos el archivo
-	fclose(f);
+
 
 }
 
 void Cliente(int clienteCliente_socket){
 	char buffer[1024];
 	char opc[1024];
-	//Recivir la opcion a realizar
-	size_t bytes_recividos = recv(clienteCliente_socket, opc, sizeof(opc), 0);
-	int opcion = atoi(opc);
-	printf("%d\n", opcion);
-	if(bytes_recividos > 0){
-		//Crear el case, con las respectivas funciones
-		switch (opcion) {
-			case 1://: Obtener datos del fichero
-				break;
-			case 2://:Obtener datos de una estacion
-				//Obtenemos Id Estacion del soket
-				sendDatosEstacion(clienteCliente_socket);
-				break;
-			case 3:
-				break;
-			default:
-			printf("Opción no valida: %i\n",opcion);
-    	}
+    int salir = 1;
 
-    } else {
-        printf("Error al recibir datos del socket: %s\n",opc);
+    while(salir){
+	    //Recivir la opcion a realizar
+	    size_t bytes_recividos = recv(clienteCliente_socket, opc, sizeof(opc), 0);
+	    int opcion = atoi(opc);
+	    printf("opcion: %d\n", opcion);
+	    if(bytes_recividos > 0){
+		    //Crear el case, con las respectivas funciones
+		    switch (opcion) {
+                case 0://Ir al menu anterior
+                    printf("dejenme salir\n");
+                    salir = 0;
+                    break;
+			    case 1://: Obtener datos del fichero
+				    break;
+			    case 2://:Obtener datos de una estacion
+				    //Obtenemos Id Estacion del soket
+				    sendDatosEstacion(clienteCliente_socket);
+				    break;
+			    case 3:
+				    break;
+			    default:
+			    printf("Opción no valida: %i\n",opcion);
+        	}
+
+        } else {
+            printf("Error al recibir datos del socket: %s\n",opc);
+        }
+	    //Enviar resultado de la peticion
     }
-	//Enviar resultado de la peticion
-
     close(clienteCliente_socket);
 }
 
@@ -119,7 +137,7 @@ void GestorClientes(){
 	int serverCliente_socket, clienteCliente_socket;
 	serverCliente_socket = socket(AF_INET, SOCK_STREAM, 0);
 
-if(serverCliente_socket == -1){
+    if(serverCliente_socket == -1){
 	    perror("Erroral crear el serverEstacion_socket");
 	    exit(EXIT_FAILURE);
 	}
