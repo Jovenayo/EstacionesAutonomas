@@ -126,6 +126,7 @@ void Cliente(int clienteCliente_socket){
 
 		} else {
 			printf("Error al recibir datos del socket: %s\n",opc);
+			salir = 0;
 		}
 		//Enviar resultado de la peticion
 	}
@@ -170,27 +171,50 @@ void GestorClientes(){
 	}
 
 	//Bucle infinito para atender peticiones de estaciones.
+	pid_t *hijos;
+	pid_t pid;
+	int n_hijos = 0;
+	hijos = malloc(n_hijos * sizeof(pid_t));
 	while(1){
 		addr_size = sizeof(clienteCliente_socket);
-
 		//Aceptar la conexion entrante
 		clienteCliente_socket = accept(serverCliente_socket, (struct sockaddr*)&clienteEstacion_address,  &addr_size);
 		if(clienteCliente_socket < 0){
 			perror("Error al aceptar la conexion"); exit(EXIT_FAILURE);
 		}
-
-		if(fork() == 0){ //Proceso hijo Estacion para mantener la conexion----------------------------[HIJO]----------------
+		pid = fork();
+		if(pid == 0){ //Proceso hijo Estacion para mantener la conexion----------------------------[HIJO]----------------
 			close(serverCliente_socket);
 			printf("Cliente conectado \n");
 			Cliente(clienteCliente_socket);//Proceso hijo Cliente
 			exit(EXIT_SUCCESS);
 		} else {
-		//Cerrar soket y termianr hijos
+		//Cerrar soket y almacenar hijos
+			//Limpiar huerfanos
+			int i = n_hijos - 1;
+			for (i; i >= 0 ; --i) {  
+				if (waitpid(hijos[i], NULL, WNOHANG) == hijos[i]){
+					kill(hijos[i], SIGKILL);
+					printf("Liberado hijo: %d\n", hijos[i]);
+					//eliminad del vector
+					if(i != 0){
+						memmove(hijos + i, hijos + i-1, 1 * sizeof(pid_t));
+					} else {
+						memmove(hijos + i+1, hijos + i, 1 * sizeof(pid_t));
+					}
+					n_hijos = n_hijos - 1;
+				}
+			}
+			n_hijos = n_hijos + 1;
+			hijos = realloc(hijos, n_hijos * sizeof(pid_t));
+			hijos[n_hijos-1] = pid;
+			printf("numHijos: %d\n", n_hijos);
+			printf("Hijo: %d\n", hijos[n_hijos - 1]);
 			close(clienteCliente_socket);
-			waitpid(-1, NULL, WNOHANG);
-		}
+		} 
 	}
 }
+
 
 
 void Estacion(int clienteEstacion_socket){ //Zona de riesgo para escribir el fichero
@@ -259,27 +283,50 @@ void GestorEstaciones(){
 	}
 
 	//Bucle infinito para atender peticiones de estaciones.
+	pid_t *hijos;
+	pid_t pid;
+	int n_hijos = 0;
+	hijos = malloc(n_hijos * sizeof(pid_t));
 	while(1){
 
 		addr_size = sizeof(clienteEstacion_socket);
 
 		//Aceptar la conexion entrante
 		clienteEstacion_socket = accept(serverEstacion_socket, (struct sockaddr*)&clienteEstacion_address,  &addr_size);
-
 		if(clienteEstacion_socket < 0){
 			perror("Error al aceptar la conexion\n");
 			exit(EXIT_FAILURE);
 		}
-
-		if(fork() == 0){//Proceso hijo Estacion para mantener la conexion---------------------------[HIJO]---------------------
+		//Proceso hijo Estacion para mantener la conexion---------------------------[HIJO]---------------------
+		pid = fork();
+		if(pid == 0){
 			printf("Estacion Conectada\n");
 			close(serverEstacion_socket);
 			Estacion(clienteEstacion_socket);//Proceso hijo Estacion
 			exit(EXIT_SUCCESS);
 		} else {
-			//Cerrar soket y termianr hijos
-			close (clienteEstacion_socket);
-			waitpid(-1, NULL, WNOHANG);
+		//Cerrar soket y almacenar hijos
+			//Limpiar huerfanos
+			int i = n_hijos - 1;
+			for (i; i >= 0 ; --i) {  
+				if (waitpid(hijos[i], NULL, WNOHANG) == hijos[i]){
+					kill(hijos[i], SIGKILL);
+					printf("Liberado hijo: %d\n", hijos[i]);
+					//eliminad del vector
+					if(i != 0){
+						memmove(hijos + i, hijos + i-1, 1 * sizeof(pid_t));
+					} else {
+						memmove(hijos + i+1, hijos + i, 1 * sizeof(pid_t));
+					}
+					n_hijos = n_hijos - 1;
+				}
+			}
+			n_hijos = n_hijos + 1;
+			hijos = realloc(hijos, n_hijos * sizeof(pid_t));
+			hijos[n_hijos-1] = pid;
+			printf("numHijos: %d\n", n_hijos);
+			printf("Hijo: %d\n", hijos[n_hijos - 1]);
+			close(clienteEstacion_socket);
 		}
 	}
 }
