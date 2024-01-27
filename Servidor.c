@@ -171,10 +171,12 @@ void GestorClientes(){
 	}
 
 	//Bucle infinito para atender peticiones de estaciones.
-	pid_t *hijos;
+	pid_t *pids;
 	pid_t pid;
+	size_t tam = 0;
+	size_t capacidad = 0;
 	int n_hijos = 0;
-	hijos = malloc(n_hijos * sizeof(pid_t));
+	pids = malloc(tam * sizeof(pid_t));
 	while(1){
 		addr_size = sizeof(clienteCliente_socket);
 		//Aceptar la conexion entrante
@@ -189,27 +191,34 @@ void GestorClientes(){
 			Cliente(clienteCliente_socket);//Proceso hijo Cliente
 			exit(EXIT_SUCCESS);
 		} else {
-		//Cerrar soket y almacenar hijos
-			//Limpiar huerfanos
-			int i = n_hijos - 1;
-			for (i; i >= 0 ; --i) {  
-				if (waitpid(hijos[i], NULL, WNOHANG) == hijos[i]){
-					kill(hijos[i], SIGKILL);
-					printf("Liberado hijo: %d\n", hijos[i]);
-					//eliminad del vector
-					if(i != 0){
-						memmove(hijos + i, hijos + i-1, 1 * sizeof(pid_t));
-					} else {
-						memmove(hijos + i+1, hijos + i, 1 * sizeof(pid_t));
-					}
-					n_hijos = n_hijos - 1;
+			//Almacenar hijos                                                            
+			if(tam == capacidad){
+				capacidad += 5;
+				pids =(pid_t *)realloc(pids, capacidad * sizeof(pid_t));
+				if(pids == NULL){
+					exit(EXIT_FAILURE);
 				}
 			}
-			n_hijos = n_hijos + 1;
-			hijos = realloc(hijos, n_hijos * sizeof(pid_t));
-			hijos[n_hijos-1] = pid;
-			printf("numHijos: %d\n", n_hijos);
-			printf("Hijo: %d\n", hijos[n_hijos - 1]);
+			pids[tam++] = pid;
+			
+			//Limpiar huerfanos
+			for (int i = tam-1; i >= 0 ; --i) {  
+				if (waitpid(pids[i], NULL, WNOHANG) == pids[i]){
+					kill(pids[i], SIGKILL);
+					
+					for (size_t j = i; j < tam; ++j) {//reordenar lista
+						pids[j] = pids[j + 1];
+					}
+					--tam;
+				}
+			}
+			
+			printf("numHijos: %ld\n", tam);
+			printf("Hijo: %d\n", pids[tam - 1]);
+			for(int j = 0; j < tam; j++){
+			printf("indice: %d, pid: %d ", j, pids[j]);
+			}
+			printf("\n");
 			close(clienteCliente_socket);
 		} 
 	}
@@ -282,11 +291,13 @@ void GestorEstaciones(){
 		exit(EXIT_FAILURE);
 	}
 
-	//Bucle infinito para atender peticiones de estaciones.
-	pid_t *hijos;
+	//Bucle infinito para atender peticiones de estaciones y su cierre.
+	pid_t *pids;
 	pid_t pid;
-	int n_hijos = 0;
-	hijos = malloc(n_hijos * sizeof(pid_t));
+	size_t tam = 0;
+	size_t capacidad = 0;
+	pids = malloc(tam * sizeof(pid_t));
+	
 	while(1){
 
 		addr_size = sizeof(clienteEstacion_socket);
@@ -305,27 +316,32 @@ void GestorEstaciones(){
 			Estacion(clienteEstacion_socket);//Proceso hijo Estacion
 			exit(EXIT_SUCCESS);
 		} else {
-		//Cerrar soket y almacenar hijos
-			//Limpiar huerfanos
-			int i = n_hijos - 1;
-			for (i; i >= 0 ; --i) {  
-				if (waitpid(hijos[i], NULL, WNOHANG) == hijos[i]){
-					kill(hijos[i], SIGKILL);
-					printf("Liberado hijo: %d\n", hijos[i]);
-					//eliminad del vector
-					if(i != 0){
-						memmove(hijos + i, hijos + i-1, 1 * sizeof(pid_t));
-					} else {
-						memmove(hijos + i+1, hijos + i, 1 * sizeof(pid_t));
-					}
-					n_hijos = n_hijos - 1;
+			//Almacenar hijos
+			if(tam == capacidad){
+				capacidad += 5;
+				pids =(pid_t *)realloc(pids, capacidad * sizeof(pid_t));
+				if(pids == NULL){
+					exit(EXIT_FAILURE);
 				}
 			}
-			n_hijos = n_hijos + 1;
-			hijos = realloc(hijos, n_hijos * sizeof(pid_t));
-			hijos[n_hijos-1] = pid;
-			printf("numHijos: %d\n", n_hijos);
-			printf("Hijo: %d\n", hijos[n_hijos - 1]);
+			pids[tam++] = pid;
+			
+			//Limpiar huerfanos
+			for (int i = tam-1; i >= 0 ; --i) {  
+				if (waitpid(pids[i], NULL, WNOHANG) == pids[i]){
+					kill(pids[i], SIGKILL);
+					for (size_t j = i; j < tam; ++j) { //reordenar lista
+						pids[j] = pids[j + 1];
+					}
+					--tam;
+				}
+			}
+			printf("numHijos: %ld\n", tam);
+			printf("Hijo: %d\n", pids[tam - 1]);
+			for(int j = 0; j < tam; j++){
+			printf("indice: %d, pid: %d ", j, pids[j]);
+			}
+			printf("\n");
 			close(clienteEstacion_socket);
 		}
 	}
